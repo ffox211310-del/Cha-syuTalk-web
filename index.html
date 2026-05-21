@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Cha-syuTalk AI System</title>
+
+<style>
+
+body{
+    background:black;
+    color:lime;
+    font-family:monospace;
+    padding:20px;
+}
+
+#chat{
+    white-space:pre-wrap;
+    margin-bottom:20px;
+}
+
+input{
+    width:70%;
+    background:black;
+    color:lime;
+    border:1px solid lime;
+    padding:10px;
+}
+
+button{
+    background:black;
+    color:lime;
+    border:1px solid lime;
+    padding:10px;
+}
+
+</style>
+</head>
+<body>
+
+<h2>Cha-syuTalk AI System</h2>
+
+<div id="chat">
+[ SYSTEM ONLINE ]
+Initializing neural core...
+</div>
+
+<input id="msg" placeholder="message">
+<button onclick="sendMessage()">SEND</button>
+
+<script type="module">
+
+import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+
+const chat = document.getElementById("chat");
+
+chat.innerHTML += "\n\nLoading AI model...\n";
+
+const engine = new webllm.MLCEngine();
+
+await engine.reload("Llama-3.2-1B-Instruct-q4f16_1-MLC");
+
+chat.innerHTML += "AI READY\n";
+
+async function sendMessage(){
+
+    const input =
+    document.getElementById("msg");
+
+    const text = input.value;
+
+    if(!text) return;
+
+    chat.innerHTML += "\n> " + text + "\n";
+
+    input.value = "";
+
+    const reply = await engine.chat.completions.create({
+        messages:[
+            {
+                role:"system",
+                content:
+                "あなたはCha-syuTalk AI Systemです。SF世界の管理AIのように喋ります。"
+            },
+            {
+                role:"user",
+                content:text
+            }
+        ]
+    });
+
+    chat.innerHTML +=
+    reply.choices[0].message.content + "\n";
+}
+
+window.sendMessage = sendMessage;
+
+</script>
+
+</body>
+</html>
